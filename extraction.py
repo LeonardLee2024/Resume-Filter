@@ -36,7 +36,7 @@ class PageExtraction:
 @dataclass
 class ExtractionResult:
     source_file: str
-    method: str  # "text" or "ocr"
+    method: str  #"text" or "ocr"
     pages: list[PageExtraction]
     warnings: list[str] = field(default_factory=list)
 
@@ -50,7 +50,7 @@ class ExtractionResult:
         ]
 
     @property
-    def full_text(self) -> str:
+    def full_text(self) -> str: 
         return "\n\n".join(p.text for p in self.pages if p.text.strip())
 
     def to_dict(self) -> dict[str, object]:
