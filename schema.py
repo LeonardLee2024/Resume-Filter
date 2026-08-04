@@ -65,7 +65,6 @@ class Education(BaseModel):
 
 
 class CandidateProfile(BaseModel):
-    """Top-level schema representing one parsed resume."""
 
     source_file: str
     contact: ContactInfo = Field(default_factory=ContactInfo)
