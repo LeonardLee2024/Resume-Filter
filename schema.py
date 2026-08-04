@@ -1,9 +1,3 @@
-"""
-Candidate data schema for the resume parsing pipeline.
-
-All models use Pydantic v2 for validation and JSON (de)serialization.
-"""
-
 from __future__ import annotations
 
 from datetime import date
@@ -82,7 +76,7 @@ class CandidateProfile(BaseModel):
     skills: list[Skill] = Field(default_factory=list)
     work_history: list[WorkExperience] = Field(default_factory=list)
     education: list[Education] = Field(default_factory=list)
-
+ 
     ai_summary: Optional[str] = Field(
         default=None,
         description="2-4 sentence AI-generated overview of the candidate.",
