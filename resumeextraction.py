@@ -107,7 +107,7 @@ def _order_blocks_by_column(blocks: list[tuple], page_width: float) -> list[tupl
         col_blocks.sort(key=lambda b: b[1])  # top-to-bottom by y0
         ordered.extend(col_blocks)
     return ordered
-
+    
 
 def extract_text_native(file_path: str | Path) -> ExtractionResult:
     path = Path(file_path)
@@ -160,7 +160,7 @@ def extract_text_ocr(file_path: str | Path, dpi: int = 300) -> ExtractionResult:
     doc = fitz.open(str(path))
     pages: list[PageExtraction] = []
     warnings: list[str] = [
-        "Extracted via OCR fallback; verify field accuracy, especially dates and numbers."
+        "Extracted via OCR fallback; verify field accuracy."
     ]
 
     try:
