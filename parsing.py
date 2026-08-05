@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 
 from schema import CandidateProfile
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You extract structured candidate data from resume text.
 Return ONLY a single JSON object (no markdown fences, no commentary) matching
@@ -36,25 +39,27 @@ Rules:
 """
 
 
-def _call_claude(resume_text: str, model: str = "claude-sonnet-4-6") -> dict:
+def _call_openai(resume_text: str, model: str = "gpt-4o-mini") -> dict:
     """
-    Calls the Anthropic API to structure the resume text. Requires
-    ANTHROPIC_API_KEY in the environment. Swap this out for your own
-    client/model choice as needed.
+    Calls the OpenAI API to structure the resume text. Requires
+    OPENAI_API_KEY in the environment. Uses JSON mode so the response
+    is guaranteed to be a parseable JSON object.
     """
-    import anthropic
+    import openai
 
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    response = client.messages.create(
+    logger.debug("Calling OpenAI model=%s on %d chars of resume text", model, len(resume_text))
+    client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    response = client.chat.completions.create(
         model=model,
         max_tokens=2000,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": resume_text[:15000]}],
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": resume_text[:15000]},
+        ],
     )
-    raw = "".join(
-        block.text for block in response.content if getattr(block, "type", "") == "text"
-    )
-    raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    raw = response.choices[0].message.content
+    logger.debug("OpenAI raw response (first 300 chars): %s", raw[:300])
     return json.loads(raw)
 
 
@@ -65,15 +70,20 @@ def parse_resume_text(
     parsed: dict = {}
 
     if not resume_text.strip():
+        logger.debug("No resume text to parse for %s", source_file)
         warnings.append("No text available to parse (empty extraction).")
     else:
         try:
-            parsed = _call_claude(resume_text)
+            parsed = _call_openai(resume_text)
+            logger.debug("Parsed keys returned: %s", list(parsed.keys()))
         except KeyError:
-            warnings.append("ANTHROPIC_API_KEY not set; skipped LLM structuring.")
+            logger.warning("OPENAI_API_KEY not set; skipping LLM structuring for %s", source_file)
+            warnings.append("OPENAI_API_KEY not set; skipped LLM structuring.")
         except json.JSONDecodeError as e:
+            logger.warning("LLM returned invalid JSON for %s: %s", source_file, e)
             warnings.append(f"LLM returned invalid JSON, discarded: {e}")
         except Exception as e:  # noqa: BLE001 - never let one bad resume kill a batch
+            logger.exception("LLM structuring failed for %s", source_file)
             warnings.append(f"LLM structuring failed: {e}")
 
     profile = CandidateProfile(
