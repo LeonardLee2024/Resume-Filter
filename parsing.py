@@ -82,7 +82,7 @@ def parse_resume_text(
         except json.JSONDecodeError as e:
             logger.warning("LLM returned invalid JSON for %s: %s", source_file, e)
             warnings.append(f"LLM returned invalid JSON, discarded: {e}")
-        except Exception as e:  # noqa: BLE001 - never let one bad resume kill a batch
+        except Exception as e: 
             logger.exception("LLM structuring failed for %s", source_file)
             warnings.append(f"LLM structuring failed: {e}")
 
