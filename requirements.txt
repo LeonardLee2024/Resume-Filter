@@ -1,0 +1,6 @@
+pymupdf>=1.24
+pdfplumber>=0.11
+pydantic[email]>=2.6
+anthropic>=0.34
+pytesseract>=0.3.10
+pillow>=10.0
