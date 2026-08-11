@@ -136,39 +136,3 @@ def search_candidates(
     """
     clauses = []
     params: dict = {}
- 
-    if skill:
-        clauses.append("skills_json LIKE :skill")
-        params["skill"] = f"%{skill}%"
-    if title:
-        clauses.append("current_title LIKE :title")
-        params["title"] = f"%{title}%"
-    if min_years_experience is not None:
-        clauses.append("total_years_experience >= :min_years")
-        params["min_years"] = min_years_experience
- 
-    where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
- 
-    with get_connection(db_path) as conn:
-        rows = conn.execute(
-            f"SELECT * FROM candidates {where} ORDER BY updated_at DESC", params
-        ).fetchall()
-        return [_row_to_dict(r) for r in rows]
- 
- 
-def delete_candidate(source_file: str, db_path: str | Path = DEFAULT_DB_PATH) -> bool:
-    with get_connection(db_path) as conn:
-        cursor = conn.execute("DELETE FROM candidates WHERE source_file = ?", (source_file,))
-        return cursor.rowcount > 0
- 
- 
-def _row_to_dict(row: sqlite3.Row) -> dict:
-    d = dict(row)
-    for json_field in (
-        "skills_json", "work_history_json", "education_json",
-        "keywords_json", "extraction_warnings_json",
-    ):
-        key = json_field.replace("_json", "")
-        d[key] = json.loads(d.pop(json_field))
-    d["raw_profile"] = json.loads(d.pop("raw_profile_json"))
-    return d
