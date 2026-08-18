@@ -67,12 +67,12 @@ def process_resume(file_path: str | Path) -> CandidateProfile:
 class BatchResult:
     succeeded: list[CandidateProfile]
     failed: list[dict]  # {"file": str, "status": str, "message": str}
- 
- 
+
+
 def process_batch(file_paths: list[str | Path]) -> BatchResult:
     succeeded: list[CandidateProfile] = []
     failed: list[dict] = []
- 
+
     for fp in file_paths:
         try:
             succeeded.append(process_resume(fp))

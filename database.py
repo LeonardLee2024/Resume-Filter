@@ -31,6 +31,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+import json
 from typing import Iterator, Optional
 
 logger = logging.getLogger(__name__)

@@ -77,7 +77,7 @@ def validate_pdf(file_path: Path) -> ValidationResult:
         total_chars = 0
         for page in doc:
             total_chars += len(page.get_text("text").strip())
-
+    
         avg_chars_per_page = total_chars / doc.page_count
         logger.debug("total_chars=%d avg_chars_per_page=%.1f", total_chars, avg_chars_per_page)
 
